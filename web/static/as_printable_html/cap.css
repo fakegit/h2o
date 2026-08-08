@@ -1,0 +1,106 @@
+/* Cap-specific style */
+
+:root {
+  --legal-doc-outset: 20px;
+  --legal-doc-shadow: rgba(14, 30, 37, 0.2);
+}
+
+.legaldocument sup {
+  font-size: calc(var(--casebook-font-size) * 0.75);
+}
+
+.legaldocument a[href^="#"] {
+  margin: 0;
+  padding: 0;
+}
+
+.legaldocument .footnotemark {
+  font-size: calc(var(--casebook-font-size) / 2);
+  vertical-align: super;
+}
+
+.legaldocument header.case-header .title,
+.legaldocument header.case-header .citation,
+.legaldocument header.case-header .decisiondate,
+.legaldocument header.case-header .docketnumber,
+.legaldocument header.case-header .court {
+  text-align: center;
+}
+
+.legaldocument header.case-header .citation,
+.legaldocument header.case-header .decisiondate,
+.legaldocument header.case-header .docketnumber,
+.legaldocument header.case-header .court {
+  letter-spacing: 1px;
+  padding: 4px;
+}
+
+.legaldocument header.case-header .court {
+  font-size: 24px !important;
+}
+
+.legaldocument header.case-header .citation,
+.legaldocument header.case-header .decisiondate,
+.legaldocument header.case-header .docketnumber {
+  font-size: 18px !important;
+}
+
+.legaldocument header.case-header .title {
+  font-weight: bold;
+  font-size: calc(var(--casebook-font-size) * 1.5) !important;
+  line-height: 1.4em !important;
+  padding: 20px 4px 10px 4px;
+}
+
+/* Hide embedded metadata in case content */
+
+.legaldocument section.resource .parties,
+.legaldocument section.resource .decisiondate,
+.legaldocument section.resource .docketnumber,
+.legaldocument section.resource .citations,
+.legaldocument section.resource .syllabus,
+.legaldocument section.resource .synopsis,
+.legaldocument section.resource .court,
+.legaldocument section.resource .page-label {
+  display: none;
+}
+.legaldocument .page-number:not:has(> del) {
+  font-size: small;
+  vertical-align: super;
+  margin: 4px;
+}
+.legaldocument aside.footnote > a {
+  float: left;
+  padding-right: 1rem;
+}
+
+.legaldocument img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+section.legaldocument-container {
+  padding: calc(3 * var(--legal-doc-outset));
+  margin: calc(2 * var(--legal-doc-outset)) calc(-1 * var(--legal-doc-outset))
+    calc(10 * var(--legal-doc-outset)) calc(-1 * var(--legal-doc-outset));
+  box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 10px 0px,
+    var(--legal-doc-shadow) 0px 2px 8px 0px;
+}
+@media print {
+  section.legaldocument-container {
+    box-shadow: none;
+  }
+  section.legaldocument-container:before {
+    border-top: 1px solid var(--legal-doc-shadow);
+    height: 1rem;
+    display: block;
+    content: "";
+  }
+  section.legaldocument-container:after {
+    border-bottom: 1px solid var(--legal-doc-shadow);
+    height: 2rem;
+    display: block;
+    content: "";
+  }
+}

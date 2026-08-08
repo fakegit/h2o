@@ -1,6 +1,7 @@
 @import 'content/dragging';
 @import 'content/annotations';
 @import 'content/modals';
+@import 'credits';
 
 main > .casebook .casebook-inner {
   @include centered-md-column(9);
@@ -10,7 +11,7 @@ main > .casebook .casebook-inner {
     For how this works, see
     https://meyerweb.com/eric/thoughts/2011/09/12/un-fixing-fixed-elements-with-css-transforms/
   */
-  transform:rotate(0deg)
+  transform:rotate(0deg);
 }
 
 main > section.casebook {
@@ -65,7 +66,7 @@ main > header.casebook {
       &.disabled {
         background-color: $light-gray;
       }
-      &:focus {
+      &:focus-visible {
         @include generic-focus-styles;
         z-index: 999;
       }
@@ -142,7 +143,7 @@ main > header.casebook {
       text-decoration: underline !important;
       color: $light-blue;
     }
-    &:focus {
+    &:focus-visible {
       @include generic-focus-styles;
     }
     &:hover {
@@ -174,18 +175,15 @@ main > header.casebook {
             content: url('~static/images/ui/casebook/export-anim.svg');
         }
     }
+    &.export-html {
+      background-image: url('~static/images/ui/casebook/export-html.svg');
+      line-height: 1.2em;
+      small {
+        color: $orange;
+      }
+    }
     &.export.animating {
         background-image: url('~static/images/ui/casebook/export-anim.svg');
-    }
-    &.export.fancy {
-        background-image: url('~static/images/ui/casebook/export-fancy.svg');
-        &::after{
-            position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
-            content: url('~static/images/ui/casebook/export-anim-fancy.svg');
-        }
-    }
-    &.export.fancy.animating {
-        background-image: url('~static/images/ui/casebook/export-anim-fancy.svg');
     }
 
     &.more, &.preview {
@@ -209,8 +207,49 @@ main > header.casebook {
   }
 }
 
+.prev_button_container a, .next_button_container a {
+  display: none;
+
+  @media (min-width: $screen-md) {
+    display: block;
+    position: fixed;
+    bottom: 40vh;
+    border-bottom: 0;
+    transition: transform .2s;
+
+    .prev_page_svg, .next_page_svg {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+    }
+
+    &:hover, &:focus {
+      transform: scale(1.2);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.prev_button_container a {
+  right: 92vw;
+  .prev_page_svg {
+    background-image: url('~static/images/ui/casebook/prev_page.svg');
+  }
+}
+
+.next_button_container a {
+  right: 5vw;
+  .next_page_svg {
+    background-image: url('~static/images/ui/casebook/next_page.svg');
+  }
+}
+
+
 form.edit_content_resource, form.edit_content_section, form.edit_content_casebook {
-  label {
+  label:not([for="cover_image-clear_id"]) {
     @extend .sr-only;
   }
   div.visible-in-form label {
@@ -218,6 +257,11 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
       width: unset;
       height: unset;
       padding-left:20px;
+  }
+  #div_id_description{
+    .form-control{
+      height:100px;
+    }
   }
 }
 
@@ -242,9 +286,18 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
     margin-bottom: 2px;
     padding: 20px 20px 20px 30px;
     background-color: $white;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
     .casebook-title {
       @include sans-serif($bold, 20px, 24px);
       color: $dark-gray;
+    }
+    .casebook-date {
+      color: $dark-gray;
+      font-size: 14px;
+      font-weight: 500;
     }
   }
   header.content {
@@ -291,24 +344,34 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
       font-size: 16px;
       font-weight: bold;
       color: $dark-gray;
+      line-height: 20px;
+      margin-bottom: 20px;
+      padding-top: 4px;
 
       .breadcrumb {
         display: inline-block;
-        line-height: 20px;
+
         color: $light-blue;
-        margin-left: 8px;
-        padding: 4px 8px 0 8px;
+        margin: 8px 0 0 0;
+        padding: 0 8px 0 8px;
         border: none;
         &:first-child {
           margin-left: 0;
         }
-        &:focus {
+        &:focus-visible {
           @include generic-focus-styles;
         }
         &.active {
           color: $dark-gray;
           font-weight: bold;
           background-color: transparent !important;
+        }
+        &.is-instructional-material {
+          background-image:url('~static/images/ui/casebook/lock.svg') ;
+          height: 20px;
+          width: 20px;
+          display: inline-block;
+          margin: 0 0 0 10px;
         }
       }
       span.breadcrumb {
@@ -320,6 +383,13 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
         padding: 0;
         margin-left: -12px;
         pointer-events: none;
+      }
+
+      .reading-time {
+        float: right;
+        color: $dark-gray;
+        font-size: 14px;
+        font-weight: 500;
       }
     }
   }
@@ -378,13 +448,10 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
         @include sans-serif($medium, 13px, 13px);
         font-weight: bold;
         display: inline-block;
-        &.verified::before {
-          @include square(13px);
-          display: inline-block;
-          vertical-align: middle;
-          content: '';
-          background: url('~static/images/ui/verified.png') no-repeat;
-        }
+        width: fit-content;
+
+        @include verified-professor();
+
       }
     }
 
@@ -392,17 +459,61 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
       font-size: 13px;
       display: inline-block;
 
-      a:focus {
+      a:focus-visible {
         @include generic-focus-styles;
       }
     }
   }
 
-  /* TODO: this block is duplicated in TheResource.vue; factor out at some point */
+  .link-container{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .link-container:hover .link-resource, .link-container a:focus .link-resource {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .link-container a:focus {
+    outline: none;
+  }
+
   .link-resource {
-    position: relative;
-    margin-bottom: 24px;
+    padding: 24px;
     background-color: $white;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .link-text-container{
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: row;
+    margin: 0 auto;
+  }
+
+  .link-icon{
+    box-shadow: none !important;
+    width: 25px;
+    height: 25px;
+    background-image: url('~static/images/Link.svg');
+  }
+
+  .link-text{
+    box-shadow: none !important;
+    font-size:16px;
+    text-align: center;
+    margin-top: 2px;
+    margin-left: 15px;
+    width:100%;
+  }
+
+  .link-svg{
+    box-shadow: none !important;
+    // width: 40px;
+    display: inline-block;
+    background-color: transparent;
+    border:none;
+    background-image: url('~static/images/ui/casebook/link-go.svg');
   }
 
   .table-of-contents, .search-results {
@@ -411,7 +522,6 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
 
       .actions {
           margin-left: 1rem;
-          margin-top: -8px;
         > form > input[type=submit], button {
           // @include square(50px);
             display: block;
@@ -423,8 +533,9 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
           background-size: auto;
           &.action-delete {
             background-image: url('~static/images/ui/edit/elide.png');
-            height: 36px;
-            width: 36px;
+            height: 20px;
+            width: 20px;
+            margin: 0;
             border-width: 0px;
             background-color: transparent;
           }
@@ -476,6 +587,7 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
         grid-template-columns: auto 1fr 15%;
 
         @media (max-width: $screen-xs) {
+          padding-right: 0;
           .resource-container {
             margin: 0 9px;
           }
@@ -614,111 +726,16 @@ form.edit_content_resource, form.edit_content_section, form.edit_content_caseboo
   }
 }
 
-#credits {
-    section.credits {
-        background-color:$white;
-        border-top: 1px solid $light-gray;
-        padding: 2rem 2rem 4rem 2rem;
-        .author-rider {
-            margin-top: 1rem;
-        }
-        .author-list {
-            display:inline;
-            list-style: none;
-            padding-left: 2rem;
+#casebook-search {
+  section.casebook-search {
+    background-color:$white;
+    border-top: 1px solid $light-gray;
+    padding: 2rem 4rem 4rem 4rem;
+  }
 
-            li {
-                display:inline;
-                white-space: nowrap;
-                &:after {
-                    content: ","
-                }
-                &:last-child:after {
-                    content: ""
-                }
-            }
-            li.verified::before {
-                @include square(13px);
-                display: inline-block;
-                vertical-align: middle;
-                content: '';
-                background: url('~static/images/ui/verified.png') no-repeat;
-            }
-
-            display: inline;
-            padding-left:4px;
-
-
-            ul {
-                display:inline;
-                list-style:none;
-                padding:0;
-            }
-            .immediate-author-list {
-                padding-right: 0.5rem;
-            }
-        }
-
-        ul.casebook-list {
-            list-style: none;
-            display:flex;
-            flex-direction: column;
-            padding: 8px;
-            >li {
-                padding-bottom:3rem;
-                border-bottom: 1px solid black;
-                margin-bottom:3rem;
-                &:last-child {
-                    border-bottom:none;
-                    padding-bottom:0rem;
-                    margin-bottom: 0;
-                }
-            }
-            .casebook-credit-header {
-                padding: 1rem 1rem 0 1rem;
-
-            }
-            .cloned-content-list {
-                list-style:none;
-                padding-left:16px;
-                display:flex;
-                flex-direction:column;
-                flex-wrap: wrap;
-                li {
-                    padding-top:6px;
-                    @for $depth from 1 to 16 {
-                        &.nesting-depth-#{$depth} {
-                            padding-left: #{(2*$depth)}rem
-                        }
-                    }
-                    .section-title {
-                        padding-right:0.5rem;
-                    }
-                    .og-node-link {
-                        &:before {
-                            content: "(";
-                        }
-                        &:after {
-                            content: ")"
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-div.related-section {
-    background-color: white;
-    padding: 1rem 2rem;
-}
-
-ul.related-content-list {
-    list-style: none;
-    ul {
-        list-style: none;
-    }
+  .search-bar-container {
+    width: 100%;
+  }
 }
 
 ul.settings-section {
@@ -877,4 +894,8 @@ div.tox-toolbar__group:nth-child(2) button.tox-tbtn.tox-tbtn--select.tox-tbtn--d
       list-style: none;
     }
   }
+}
+
+.casebook-copyright-notice {
+  margin-top: 4rem;
 }

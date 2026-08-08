@@ -13,23 +13,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.urls import path, include
-from main.admin import admin_site
+from main.admin import admin_site  # type: ignore  # main/admin.py is entirely ignored
 
 
-handler400 = 'main.views.bad_request'
-handler500 = 'main.views.server_error'
+handler400 = "main.views.bad_request"
+handler500 = "main.views.server_error"
 
 urlpatterns = [
-    path('', include('main.urls')),
-    path('django-admin/', admin_site.urls),
+    path("", include("main.urls")),
+    path("django-admin/", admin_site.urls),
 ]
 
 # use django-debug-toolbar if installed
 if settings.DEBUG:
     try:
         import debug_toolbar
-        urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+
+        urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
     except ImportError:
         pass

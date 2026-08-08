@@ -1,7 +1,7 @@
 {% load current_query_string short_page_range %}
 
 {% if results.has_other_pages %}
-<nav aria-label="Search Results">
+<nav class="search-results-pagination" aria-label="Search Results Pagination">
   <ul class="pagination">
     {% if results.has_previous %}
       <li>
@@ -25,14 +25,14 @@
           </span>
         </li>
       {% else %}
-        {% ifequal i results.number %}
+        {% if i == results.number %}
           <li class="active">
             {# TODO: add style to css #}
             <span style="background-color: #3e72d8;"><span class="sr-only">Page</span>{{ results.number }} <span class="sr-only">(current page)</span></span>
           </li>
         {% else %}
           <li><a href="{{ path }}?{% current_query_string page=i %}"><span class="sr-only">Page</span> {{ i }}</a></li>
-        {% endifequal %}
+        {% endif %}
       {% endif %}
     {% endfor %}
 

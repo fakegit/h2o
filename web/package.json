@@ -6,10 +6,16 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test": "vue-cli-service test:unit --require frontend/test/mocha_setup.js frontend/test/**/*.test.js",
+    "test-watch": "vue-cli-service test:unit --require frontend/test/mocha_setup.js frontend/test/**/*.test.js --watch",
     "lint": "vue-cli-service lint frontend/"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.2",
+    "@fortawesome/free-solid-svg-icons": "^6.1.2",
+    "@fortawesome/vue-fontawesome": "^2.0.8",
     "@holtchesley/vue-nestable": "git://github.com/holtchesley/vue-nestable.git#063a64e67e5a1acbb2b7d7556748a3ce00d1ca52",
+    "@sentry/tracing": "^7.38.0",
+    "@sentry/vue": "^7.36.0",
     "@trevoreyre/autocomplete-vue": "^2.2.0",
     "axios": "^0.21.4",
     "bluebird": "^3.5.0",
@@ -71,12 +77,12 @@
     "null-loader": "^3.0.0",
     "sass": "^1.23.7",
     "sass-loader": "^8.0.0",
-    "sinon": "^7.3.2",
+    "sinon": "^15.0.3",
     "tinymce": "^5.10.2",
+    "vue-loader": "^15.6.2",
     "vue-template-compiler": "^2.6.10",
     "webpack-bundle-tracker": "^0.4.3",
     "webpack-dev-server": "^3.3.1",
-    "vue-loader": "^15.6.2",
     "xhr-mock": "^2.3.1"
   },
   "eslintConfig": {

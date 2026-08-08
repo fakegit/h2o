@@ -1,0 +1,94 @@
+{% load call_method string_strip export_node_html %}
+
+<section
+  data-datetime="{{ node.created_at|date:'c' }}"
+  class="{{ node.type }} {{ node.resource_type|default:'' | lower }} depth-{{ node.ordinals | length }}">
+
+  <div class="node-container">
+
+    {% if node.resource_type == 'Link' %}
+
+      <h1 class="resource ordinal {{ node.resource_type|lower }}" data-toc-idx="{{ index }}" id="{{ node.slug }}">{{ node.ordinal_string }}{% if node.ordinal_string %}.{% endif %}
+        {{ node.title }}
+      </h1>
+
+      <h2 class="subtitle">{{ node.subtitle|default_if_none:"" }}</h2>
+
+      {% if node.headnote %}
+        {% call_method node 'headnote_for_export' export_options=export_options as headnote %}
+        <section class="headnote">{{ headnote }}</section>
+      {% endif %}
+
+      <div class="link-container">
+        <a href="{{ node.resource.url }}" target="_blank" data-type="resource link">
+          {% if as_pdf %}{{ node.resource.url }}{% else %}{{ node.title }}{% endif %}</a>
+        <span class="link-icon"></span>
+      </div>
+
+    {% else %}
+
+        <h1 class="{{ node.type }} title" id="{{ node.slug }}">
+          <span class="node-heading depth-{{ node.ordinals | length }}">{{ node.ordinal_string }} {{ node.title }}</span>
+
+          <span class="{{ node.type }} ordinal" data-toc-idx="{{ index }}">{{ node.ordinal_string }}</span>
+          <span>{{ node.title }}</span>
+
+        </h1>
+
+        {% if node.subtitle %}
+          <h2 class="subtitle">{{ node.subtitle }}</h2>
+        {% endif %}
+
+        {% if node.headnote %}
+          {% call_method node 'headnote_for_export' export_options=export_options as headnote %}
+          <section class="headnote">{{ headnote }}</section>
+        {% endif %}
+
+        {% if node.is_resource %}
+
+        <section class="{{ node.resource_type.lower }}-container">
+
+
+          {% if as_pdf %}
+            {% export_node_html node export_options=export_options as contents %}
+            {{ contents }}
+
+          {% else %}
+
+            {% if node.resource_type.lower == 'legaldocument' %}
+              {% if node.resource.doc_class.lower == 'case' %}
+                {% if node.resource.metadata.html_info.source == 'cap' %}
+                  {% include "includes/legal_doc_sources/cap_header.html" with legal_doc=node.resource %}
+                {% elif node.resource.metadata.html_info.source == 'court listener' %}
+                  {% include "includes/legal_doc_sources/court_listener_header.html" with legal_doc=node.resource %}
+                {% endif %}
+              {% elif node.resource.doc_class.lower == 'code' %}
+                {% include "includes/legal_doc_sources/gpo_header.html" with legal_doc=node.resource %}
+              {% endif %}
+            {% endif %}
+
+            {# Whitespace between the <section> element and the content must not be introduced to avoid throwing off the annotation offset values #}
+            <section class="resource" data-node-id="{{ node.id }}" data-resource-id="{{ node.resource_id }}">{{ node.resource.content|safe }}</section>
+          {% endif %}
+
+          {% for annotation in node.annotations.valid %}
+          <li data-annotation-type="{{ annotation.kind }}"
+              data-annotation-id="{{ annotation.id }}"
+              data-node-id="{{ annotation.resource_id }}"
+              data-start-offset="{{ annotation.global_start_offset }}"
+              data-end-offset="{{ annotation.global_end_offset }}"
+              data-datetime="{{ annotation.created_at|date:'c' }}"
+              class="hidden">{{ annotation.content }}</li>
+          {% endfor %}
+            </section>
+        {% endif %}
+    {% endif %}
+
+  </div>
+
+
+</section>
+
+
+
+

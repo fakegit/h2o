@@ -1,6 +1,19 @@
 <template>
 <div class="table-of-contents"
      v-bind:class="{'editable':editing}">
+     <div class="take-notes-tip" v-if="this.toc.length !== 0 && editing && verified_professor=='False'">
+        <span class="take-notes-icon"></span>
+        <p>Click on the content below to Take Notes!</p>
+     </div>
+     <button
+        :aria-expanded="!tocCollapsed ? 'true' : 'false'"
+        :aria-label="tocCollapsed ? 'expand all' : 'collapse all'"
+        class="action-expand toc-expand"
+        @click="toggleToc"
+      >
+      <collapse-triangle :collapsed="tocCollapsed" />
+      {{ tocCollapsed ? "Expand all" : "Collapse all" }}
+     </button>
      <vue-nestable v-model="toc"
                    :max-depth="100"
                    :hooks="{'beforeMove':canMove}"
@@ -21,12 +34,14 @@
         </vue-nestable>
         </div>
         </template>
-        
+
 <script>
 import _ from "lodash";
 import { VueNestable } from "@holtchesley/vue-nestable";
 import Placeholder from "./TableOfContents/PlaceHolder";
 import Entry from "./TableOfContents/Entry";
+import CollapseTriangle from "./CollapseTriangle";
+
 import { createNamespacedHelpers } from "vuex";
 const { mapActions, mapMutations } = createNamespacedHelpers(
   "table_of_contents"
@@ -36,10 +51,12 @@ export default {
   components: {
     VueNestable,
     Placeholder,
-    Entry
+    Entry,
+    CollapseTriangle,
   },
   data: () => ({
-    needsDeleteConfirmation: {}
+    needsDeleteConfirmation: {},
+    tocCollapsed: false
   }),
   directives: {
     focus: {
@@ -124,11 +141,11 @@ export default {
       ) {
         path[pathFrom.length] += 1;
       }
-      
+
       let ii = path.splice(0, 1)[0];
       let curr = this.toc[ii];
       while (path.length > 0) {
-        res_path.push({ ii, t: curr.resoure_type });
+        res_path.push({ ii, t: curr.resource_type });
         if (
           (curr.resource_type !== null && curr.resource_type !== "Section") ||
             curr.id === dragItem.id ||
@@ -162,9 +179,30 @@ export default {
         parent,
         index
       });
-    }
+    },
+    collapseToc() {
+      const ids = this.$store.getters["table_of_contents/topLevelNodes"](
+        this.rootNode
+      );
+      this.$store.dispatch("table_of_contents/collapseAll", { ids });
+    },
+    expandToc() {
+      const ids = this.$store.getters["table_of_contents/topLevelNodes"](
+        this.rootNode
+      );
+      this.$store.dispatch("table_of_contents/expandAll", { ids });
+    },
+    toggleToc() {
+      if (this.tocCollapsed) {
+        this.tocCollapsed = false;
+        this.expandToc();
+      } else {
+        this.tocCollapsed = true;
+        this.collapseToc();
+      }
+    },
   },
-  props: ["editing", "rootOrdinals"],
+  props: ["editing", "rootOrdinals","verified_professor"],
   created: function() {
     this.fetch({ casebook: this.casebook, subsection: this.section });
   }
@@ -196,7 +234,7 @@ export default {
             }
         }
     }
-    
+
     .transmute-dropdown:hover {
         color: black;
         border-color: black;
@@ -215,7 +253,20 @@ export default {
     button.action-expand {
         border: 0 solid transparent;
         background: transparent;
-        margin: -8px;
+    }
+    button.toc-expand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 10px 0 10px -5px;
+        padding: 0;
+        font-weight: bold;
+
+        svg polygon {
+          fill: $light-blue;
+          stroke: transparent;
+        }
+
     }
     .no-collapse-padded {
         width: 32px;
@@ -295,19 +346,27 @@ export default {
     .listing {
         display: flex;
         justify-content:space-between;
-        align-items: baseline;
+        align-items: center;
         width: 100%;
         padding: 12px 16px;
         /* padding-right: 42px; */
         margin-top: 6px;
         border: 1px solid $black;
-        
+
         .list-left,
         .list-right {
             display: flex;
             flex-direction:row;
             div {
-                align-self:baseline;
+                align-self:center;
+            }
+            .is-instructional-material {
+                background-image:url('~static/images/ui/casebook/lock.svg') ;
+                height: 20px;
+                width: 20px;
+                margin-left: -5px;
+                display: inline-block;
+                align-self: flex-end;
             }
         }
         .list-right {
@@ -315,20 +374,16 @@ export default {
         }
         .actions {
             position: relative;
-            top: 12px;
+            top: 0;
         }
         &.section {
-            .actions {
-                min-height:44px;
-            }
-            
             align-items: left;
             background-color: $black;
-            
+
             @media (max-width: $screen-xs) {
                 flex-direction: row;
             }
-            
+
             .section-title {
                 display: inline;
                 font-weight: $medium;
@@ -343,10 +398,10 @@ export default {
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
-                
+
                 @media (max-width: $screen-xs) {
                     margin-right: -4px;
-                    
+
                     .resource-type {
                         padding: 2px 7px;
                     }
@@ -357,57 +412,57 @@ export default {
                 background-color: #c9302c;
                 border-color: #ac2925;
             }
-            
-            
+
+
         }
         &.resource {
             background-color: $white;
-            
+
             @media (max-width: $screen-xs) {
                 .resource-container {
                     margin: 0 9px;
                 }
             }
-            
+
             .section-title {
                 display: inline;
             }
-            
+
             .case-section-title {
                 margin-bottom: 4px;
             }
-            
+
             .section-number,
             .section-title {
                 color: $black;
             }
-            
+
             .case-metadata-container {
                 display: flex;
                 align-items: center;
-                
+
                 @media (max-width: $screen-xxs) {
                     flex-direction: column;
                     align-items: flex-start;
                 }
-                
+
                 .resource-case:empty {
                     display: none;
                 }
-                
+
                 .resource-case {
                     margin-right: 9px;
                 }
             }
-            
+
             .resource-type-container {
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
-                
+
                 @media (max-width: $screen-xs) {
                     margin-right: -4px;
-                    
+
                     .resource-type {
                         padding: 2px 7px;
                     }
@@ -440,8 +495,10 @@ export default {
                 border-color: $white;
             }
             *:focus {
-                outline: 2px solid $white;
-                outline-offset: 2px;
+                outline: none !important;
+            }
+            *:focus-visible {
+                outline: 2px solid $white !important;
             }
             .transmute-dropdown {
                 color: black;
@@ -450,12 +507,12 @@ export default {
             .action-cancel-delete {
                 color: black;
             }
-            
+
             .btn.btn-danger {
                 color: #fff;
                 background-color: #c9302c;
                 border-color: #ac2925;
-                
+
                 &:hover {
                     color: #fff;
                     background-color: #d9534f;
@@ -479,10 +536,9 @@ export default {
         @media (min-width: $screen-xs) {
             &.section {
                 flex-direction: row;
-                align-items: baseline;
+                align-items: center;
             }
         }
-        
         .section-number,
         .section-number:after {
             font-size: 12px;
@@ -499,11 +555,11 @@ export default {
         .resource-date {
             @include sans-serif($light, 14px, 14px);
             display: inline-block;
-            
+
             text-align: left;
             color: $black;
         }
-        
+
         .resource-type {
             border: 1px solid $light-blue;
             color: $light-blue;
@@ -526,13 +582,11 @@ export default {
         .nestable-list {
             border-left: 8px solid $light-blue;
             padding-left: 16px;
-            margin-left: 30px;
         }
     }
     div.editable .nestable-list .nestable-list {
         border-left: 8px solid $yellow;
         padding-left: 16px;
-        margin-left: 30px;
     }
     .nestable-drag-layer {
         opacity: 0.7;
@@ -556,10 +610,29 @@ export default {
         text-decoration: underline;
         color: $light-blue;
         display: inline;
-        
+
         &:hover {
             font-weight: bold;
         }
+    }
+}
+
+.editable .take-notes-tip{
+    justify-content: center;
+    margin: 5%;
+    display:flex;
+    flex-direction: row;
+    p{
+       padding:12px;
+       margin:0px;
+       text-align: center;
+       font-weight: 900;
+    }
+    .take-notes-icon{
+        background-image:url('~static/images/take-notes-icon.svg') ;
+        display: inline-block;
+        height: 40px;
+        width: 40px;
     }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="add-content">
     <button
       class="action one-line add-resource"
       v-on:click.stop.prevent="displayModal()"
@@ -23,16 +23,16 @@
         </div>
 
         <div class="add-resource-body" v-if="caseTab">
-          <case-searcher
-            :search-on-top="false"
-            :can-cancel="true"
-            v-model="caseQueryObj"
-            @choose="selectCase"
-          />
-          <case-results :queryObj="caseQueryObj" @choose="selectCase"/>
+          <legal-document-search :casebook="casebook" :section="section" @close="showModal = false"/>
         </div>
+        
         <div class="add-resource-body" v-else-if="textTab">
           <form ref="textForm" class="new-text" v-on:submit.stop.prevent="submitTextForm()">
+
+            <p>Add your own content, paste in a case or other legal document not in our database, 
+              or embed images and videos.
+            </p>
+
             <div v-bind:class="{'form-group': true, 'has-error': errors.name}">
               <label class="title">
                 Title
@@ -59,20 +59,22 @@
                 </span>
               </label>
             </div>
-            <input class="save-button" type="submit" :value="pendingSubmit ? 'Save in progress' : 'Save Text'" :disabled="pendingSubmit" />
+            <input class="save-button" type="submit" :value="pendingSubmit ? 'Save in progress' : 'Add'" :disabled="pendingSubmit" />
           </form>
         </div>
         <div class="add-resource-body" v-else-if="linkTab">
-          <h3>Enter the URL of any asset to link from the web.</h3>
-          <h4>Some examples: YouTube videos, PDFs, JPG, PNG, or GIF images</h4>
+
           <form ref="linkForm" class="new-link" v-on:submit.stop.prevent="submitLinkForm()">
+            <p>Enter a URL to direct readers to a web resource. Examples could include online news articles, 
+            law review articles or podcasts.
+            </p>
             <div v-bind:class="{'form-group': true, 'has-error': errors.url}">
               <input
                 class="form-control"
                 ref="link_body"
                 name="url"
                 type="text"
-                placeholder="Enter a URL to add it to your casebook"
+                placeholder="https://example.com"
                 v-model="linkTarget"
                 v-focus
               />
@@ -80,7 +82,7 @@
                 <strong>{{errors.url[0].message}}</strong>
               </span>
             </div>
-            <input class="search-button" type="submit" :value="pendingSubmit ? 'Save in progress' : 'Add Link'" :disabled="pendingSubmit" />
+            <input class="search-button" type="submit" :value="pendingSubmit ? 'Save in progress' : 'Add'" :disabled="pendingSubmit" />
           </form>
         </div>
       </template>
@@ -90,8 +92,8 @@
 
 <script>
 import Modal from "./Modal";
-import CaseSearcher from "./CaseSearcher";
-import CaseResults from "./CaseResults";
+import LegalDocumentSearch from "./LegalDocumentSearch/LegalDocumentSearch";
+
 import Editor from "./TinyMCEEditor";
 
 
@@ -105,8 +107,7 @@ const { mapActions } = createNamespacedHelpers("case_search");
 export default {
   components: {
     Modal,
-    CaseSearcher,
-    CaseResults,
+    LegalDocumentSearch,
     editor: Editor
   },
   props: ["casebook", "section"],
@@ -165,11 +166,6 @@ export default {
       this.currentTab = newTab;
       tryFocus();
     },
-    runCaseSearch: function runCaseSearch() {
-      if (this.caseQuery !== "") {
-        this.fetch({ query: this.caseQuery });
-      }
-    },
     submitCaseForm: function submitCaseForm() {},
     submitTextForm: function submitTextForm() {
       let formData = new FormData(this.$refs.textForm);
@@ -192,18 +188,6 @@ export default {
         this.handleSubmitErrors
       );
     },
-    selectCase: function(c) {
-      let importUrl = this.docImportUrl({sourceId: c.source_id});
-      let addUrl = this.docAddUrl({casebookId: this.casebook});
-      let formData = new FormData();
-      formData.append("section", this.section);
-      const handler = this.handleSubmitResponse;
-      this.pendingSubmit = true;
-      Axios.post(importUrl, { id: c.id }).then(resp => {
-          formData.append("resource_id", resp.data.id)
-          Axios.post(addUrl, formData).then(handler, this.handleSubmitErrors);
-      });
-    },
     handleSubmitResponse: function handleSubmitResponse(response) {
       let location = response.request.responseURL;
       window.location.href = location;
@@ -223,9 +207,31 @@ export default {
 <style lang="scss">
 @use "sass:color";
 @import "variables";
-label.textarea {
-  width: 100%;
+
+.add-resource-body {
+  width: 95%;
+  margin: auto;
+
+  :is(.new-text, .new-link) {
+    
+    label.textarea {
+      width: 100%;
+    }
+    label > :is(input, div) {
+      margin-top: .5em;
+    }
+    label {
+      margin: 1em 0;
+    }
+    input[type="submit"] {
+      margin: 1em 0;
+    }
+  }
+  .new-link input {
+    margin: .5em 0;
+  }
 }
+
 .search-tabs {
   display: flex;
   flex-direction: row;
@@ -281,7 +287,5 @@ label.textarea {
   }
 }
 
-a.action.add-resource {
-  background-image: url(http://localhost:8080/static/dist/img/add-material.d109215f.svg);
-}
+
 </style>

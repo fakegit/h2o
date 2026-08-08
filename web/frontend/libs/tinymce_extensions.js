@@ -1,6 +1,6 @@
-import uuid from 'uuid';
 import Axios from '../config/axios';
 import _ from 'lodash';
+import uuid from 'uuid';
 
 const defaultDescription = 'Image description';
 
@@ -406,8 +406,12 @@ export function getInitConfig(selector, enhanced, code) {
   }
 
   let extend_valid_elements = [['div', ['class', 'title', 'style', 'tabindex', 'id', 'class', 'data-custom-style']],
-                               ['span', ['class', 'title', 'style', 'tabindex', 'id', 'class', 'data-custom-style'],
-                                ['img', ['class', 'alt', 'title', 'id', 'data-custom-style']]]]
+                               ['span', ['class', 'title', 'style', 'tabindex', 'id', 'class', 'data-custom-style']],
+                               ['img', ['class', 'alt', 'title', 'id', 'data-custom-style']],
+                               // Needed for YouTube embeds; in particular, `referrerpolicy="strict-origin-when-cross-origin"`
+                               // prevents YouTube "Error 153: Video player configuration error" in some environments.
+                               // Allow lots here: the server-side cleanup code will validate more closely.
+                               ['iframe', ['width', 'height', 'src', 'title', 'frameborder', 'allow', 'referrerpolicy', 'allowfullscreen', 'loading', 'class', 'id', 'style']]]
       .map(x => `${x[0]}[${x[1].join('|')}]`)
       .join(',');
 
@@ -417,7 +421,7 @@ export function getInitConfig(selector, enhanced, code) {
                           {title: 'Right aligned', value: 'image-right-medium'}
                          ];
   let config = {
-    height:'60vh',
+    height:'25vh',
     plugins: plugins,
     skin_url: '/static/tinymce_skin',
     content_style: semanticStyles,
@@ -436,6 +440,10 @@ export function getInitConfig(selector, enhanced, code) {
     paste_remove_styles: true,
     paste_remove_styles_if_webkit: true,
     paste_strip_class_attributes: "all",
+    // image URLs
+    relative_urls: false,
+    convert_urls: false,
+    remove_script_host : false,
     media_dimensions: false,
     extended_valid_elements: extend_valid_elements,
     setup: (editor) => {

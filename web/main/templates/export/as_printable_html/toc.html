@@ -1,0 +1,36 @@
+
+<nav class="toc">
+    <toc-control {{ toc_is_open|yesno:'open,,'}}>
+        {% if as_pdf %}
+            <h2>Table of contents</h2>
+        {% else %}
+            <button class="toc-opener" role="button">
+                <svg class="screen-only collapse-triangle" height="25" width="25">
+                    <polygon points="6,6 20,16 6,24" />
+                </svg>
+                <h2>Table of contents</h2>
+            </button>
+        {% endif %}
+
+        <ol class="toc-items">
+        {% for top_level_node in toc %}
+            <li>
+                {% with chapter_num=forloop.counter %}
+                    <span class="ordinals">{{ top_level_node.ordinal_string }}</span>
+                    <h3><a href="{% url 'as_printable_html' casebook chapter_num %}#{{ top_level_node.slug }}">{{ top_level_node.title }}</a></h3>
+                    <ol>
+                        {% for child in top_level_node.children %}
+                            <li>
+                                <span class="ordinals">{{ child.ordinal_string|default:"—" }}</span>
+                                <h4 class="node-title">
+                                    <a href="{% url 'as_printable_html' casebook chapter_num %}#{{ child.slug }}">{{ child.title }}</a>
+                                </h4>
+                            </li>
+                        {% endfor %}
+                        </ol>
+                {% endwith %}
+            </li>
+        {% endfor %}
+        </ol>
+    </toc-control>
+</nav>

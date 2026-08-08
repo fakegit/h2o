@@ -10,9 +10,11 @@
     <script>
      {# frontend_urls is set by config.context_processors.frontend_urls #}
      const FRONTEND_URLS = {{ frontend_urls | safe}};
-     window.SUP = {% if super %}true{% else %}false{% endif %};
+     window.ENABLE_MEDIA_UPLOAD =  {% if request.user.is_superuser or request.user.verified_professor or request.user.groups.all.0.name == "Research Assistant" %}true{% else %}false{% endif %};
      window.VERIFIED = {% if request.user.verified_professor %}true{% else %}false{% endif %};
     </script>
+    
+    {% include "includes/sentry.html" %}
     {% render_bundle 'main' %}
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lora|Sorts+Mill+Goudy"/>
     <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"/>
@@ -26,6 +28,7 @@
       <a href="#main" class="skip-link">Skip to main content</a>
       <a href="#footer" class="skip-link">Skip to footer</a>
       <div class="modal-overlay"></div> <!--bizarrely, something is swapping out the class overlay -> modal-overlay in the Rails app... to be investigated -->
+      {% comment %}{% include 'includes/announcement_banner.html' %} {% endcomment %}
       {% block banner %}{% endblock banner %}
       <header id="main-header">
         {% include 'includes/header.html' %}
@@ -33,19 +36,19 @@
       <main>
         {% block custom_skip_target %}<p id="main" tabindex="-1" class="sr-only">Main Content</p>{% endblock %}
         {% if request.user.is_superuser %}
-          <section id="flash">
+          <section class="flash">
             <div class="content">
-              <div class="flash-error flash-message">
+              <div class="flash-admin flash-message">
                 Admin Mode
               </div>
             </div>
           </section>
         {% endif %}
         {% if messages %}
-          <section id="flash">
+          <section class="flash">
             <div class="content">
               {% for message in messages %}
-                <div class="flash-message flash-{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+                <div class="flash-message flash-{% if message.tags %}{{ message.tags }}{% endif %}">{{ message|safe }}</div>
               {% endfor %}
             </div>
           </section>

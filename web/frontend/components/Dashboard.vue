@@ -1,12 +1,13 @@
 <template>
   <div>
+    
     <Modal v-if="finalizingGroup" @close="finalizingGroup = false">
       <template slot="title">Group Casebooks</template>
       <template slot="body">
         <form @submit.prevent.stop="createGroup" class="form-group">
           <div>
             <div v-if="selectedCoAuthors.length > 0">
-              The following co-authors will also see this group: 
+              The following co-authors will also see this group:
               <span>{{selectedCoAuthors}}</span>
             </div>
             <label for="newGroupTitle">
@@ -18,7 +19,7 @@
             </div>
           </div>
           <br>
-          <div>            
+          <div>
             <label for="current">
               Current Edition
             </label>
@@ -37,23 +38,29 @@
         </form>
       </template>
     </Modal>
-    <div v-if="user.active">
-      <h2 class="casebooks">My Casebooks</h2>
-      <div class="archived-link"><a href="casebooks/archived/">[View Archived Casebooks]</a></div>
-      <hr class="owned"/>
+    <div class="dashboard-header"> 
+      <h1>{{ user.name }}</h1> 
+      <span v-if="user.pronouns" class="pronouns"> ({{ user.pronouns }})</span>
+      <a v-if="user.personal_site" class="personal-site" :href="user.personal_site">
+        <!-- <font-awesome-icon icon="fa-solid fa-link" /> -->
+        {{ user.personal_site }}
+      </a> 
     </div>
-    <div v-else>
-      <h2 class="casebooks">{{ user.name }}'s Casebooks</h2>
-      <hr class="owned"/>
+    <div v-if="user.short-bio" class="short-bio">
+      {{ user.short_bio }}
     </div>
-    <div class="management-links" v-if="user.active && !managingCasebooks"> <a @click="startManagement">Manage Casebooks</a> </div>
+    <h2 class="casebooks">Casebooks</h2>
+    <div v-if="user.active" class="archived-link"><a href="/casebooks/archived/">[View Archived Casebooks]</a></div>
+    <hr class="owned"/>
+    <div class="management-links" v-if="user.active && !managingCasebooks"> <a href="#" role="button" @click="startManagement">Manage Casebooks</a> </div>
     <div class="management-links" v-if="user.active && managingCasebooks">
       <ul>
         <li>
           <a v-bind:class="{'disabled': !canArchive}"
              @click="archiveCasebooks"
              @mouseover="activateHelp(archiveHelp)"
-             @mouseleave="deactivateHelp">
+             @mouseleave="deactivateHelp"
+             href="#" role="button">
             Archive selected
           </a>
         </li>
@@ -61,7 +68,8 @@
           <a v-bind:class="{'disabled': !canUngroup}"
              @click="unTitle"
              @mouseover="activateHelp(ungroupHelp)"
-             @mouseleave="deactivateHelp">
+             @mouseleave="deactivateHelp"
+             href="#" role="button">
             Ungroup selected
           </a>
         </li>
@@ -69,12 +77,13 @@
           <a v-bind:class="{'disabled': !canGroup}"
              @click="finalizeGroup"
              @mouseover="activateHelp(groupHelp)"
-             @mouseleave="deactivateHelp">
+             @mouseleave="deactivateHelp"
+             href="#" role="button">
             Group selected
           </a>
         </li>
         <li>
-          <a title="Finish managing casebooks" @click="stopManagement">Done</a>
+          <a title="Finish managing casebooks" @click="stopManagement" href="#" role="button">Done</a>
         </li>
       </ul>
 
@@ -85,7 +94,12 @@
 <div class="content-browser">
   <div v-bind:class="managingCasebooks ? 'content-selectable' : 'content-clickable'">
     <casebook :selectable="managingCasebooks" :casebook="casebook" v-model="selectedCasebooks" v-for="casebook in casebooks" v-bind:key="casebook.id"> </casebook>
-  </div>
+   <div v-if="user.active" class="create-casebook-wrapper"> 
+        <button type="button" data-action="show-casebook-modal" class="create-casebook-button">
+            <div class="create-casebook-text">Create a New Casebook</div>
+        </button>
+    </div>
+  </div> 
 </div>
 
 
@@ -279,7 +293,7 @@ export default {
         },
         addToGroupHelp: function(title) {
             return this.canAddToGroup(title) ? "Add selected casebooks to this group" : "Only public casebooks that do not belong to another group can be added to this group";
-        },        
+        },
         resetManagement: function() {
             this.finalizingGroup = false;
             this.newGroupCurrent =  {};
@@ -478,11 +492,11 @@ export default {
     flex-direction: row;
     padding-left:0;
     overflow-x:scroll;
-    
+
     .untitled {
         width: 100%;
-    }    
-    
+    }
+
     .new-group-choices {
         list-style: none;
         display: flex;
@@ -492,7 +506,7 @@ export default {
         overflow-x:scroll;
         li {
             overflow-x:scroll;
-            
+
             &.header {
                 page-break-before: always;
                 break-before: always;
@@ -552,7 +566,7 @@ export default {
     flex-wrap: wrap;
     .padded {
         flex-direction: column;
-        padding-bottom: 16px;
+        padding-bottom: 80px;
     }
 }
 
@@ -594,4 +608,56 @@ export default {
 .help-manage {
     text-align: end;
 }
+.create-casebook-wrapper{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    padding: 35px 0px 80px 40px;
+}
+.create-casebook-button {
+    background:url('~static/images/ui/casebook/add-casebook.svg') no-repeat;
+    background-size: 60px;
+    background-position:50% 40%;
+    height: 330px;
+    width:225px;
+    border: 1px dashed gray;
+    margin-right: 10px;
+    margin-bottom: 15px;
+
+    .create-casebook-text{
+        margin-top: 40%;
+    }
+}
+.create-casebook-button:hover{
+    box-shadow: 0 3px 40px rgb(0 0 0 / 0.3);
+}
+.create-casebook-button:focus{
+    box-shadow: 0 3px 40px rgb(0 0 0 / 0.3);
+    outline:none;
+}
+
+.content-page:focus{
+box-shadow: 0 3px 40px rgb(0 0 0 / 0.3);
+}
+
+.dashboard-header {
+	display:  flex;
+	flex-direction: row;
+	align-items: baseline;
+}
+
+.dashboard-header > h1 {
+    display: inline-block;
+    font-size: 2em;
+    margin-right: 0.2em;
+}
+
+.dashboard-header > .pronouns {
+    font-size: 1.3em;
+}
+
+.dashboard-header > .personal-site {
+	margin-left: auto 
+}
+
 </style>

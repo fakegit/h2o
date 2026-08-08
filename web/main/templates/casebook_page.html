@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize_minutes %}
 
 {% if edit_mode or clone_section_targets %}
 {% load render_bundle from webpack_loader %}
@@ -16,18 +17,30 @@
 {% endblock %}
 
 {% block mainContent %}
-
-
 {% include 'includes/casebook_page_tabs.html' %}
 
 <section class="casebook {{casebook_color_class}}">
     <div class="content">
+        {% if section and not editing %}
+            <div>
+                {% include 'includes/page_buttons.html' with previous_and_next_urls=previous_and_next_urls %}
+            </div>
+        {% endif %}
         <div class="casebook-inner">
+
             <div class="top-strip"></div>
             <header class="casebook-header">
                 <div class="casebook-title">
                     {{ casebook.title }}
                 </div>
+                {% if page == "casebook_page" and casebook.first_published.entry_date %}
+                    <div class="casebook-date">
+                        First published {{ casebook.first_published.entry_date | date:"M Y" }}
+                        {% if casebook.last_updated.entry_date > casebook.first_published.entry_date %}
+                        and updated {{ casebook.last_updated.entry_date | date:"M Y" }}
+                        {% endif %}
+                    </div>
+                {% endif %}
             </header>
             {% if section %}
             <header class="content">
@@ -42,31 +55,22 @@
                     {% if search_sources_json %}:search-sources="{{search_sources_json}}"  {% endif %}
                 ></globals>
                 {% if editing %}
-                    {% if section and section.is_temporary %}
-                <resource-type-picker></resource-type-picker>
-                {% else %}
-
-                {% if can_check_for_updates %}
-                <hr />
-                {% if case_has_update %}
-                
-                <a href="{% url 'update_legal_doc' section %}">Update this Legal Document</a>
-
-                {% elif checked_case_for_updates %}
-                No updates to case.
-                {% else %}
-                Could not check for case updates (Legacy document).
-                {% endif %}
-                <hr />
-                {% endif %}
-                
-                <form class="edit_content_{% if section and section.has_body %}resource{% elif section%}section{% else %}casebook{% endif %}" method="{{ form.helper.form_method }}">
-                    {% crispy form %}
-                    {% if embedded_resource_form %}{% crispy embedded_resource_form %}{% endif %}
-                </form>
-
-
+                    {% if can_check_for_updates %}
+                        <hr />
+                            {% if case_has_update %}
+                                <a href="{% url 'update_legal_doc' section %}">Update this Legal Document</a>
+                            {% elif checked_case_for_updates %}
+                                No updates to case.
+                            {% else %}
+                                Could not check for case updates (Legacy document).
+                            {% endif %}
+                        <hr />
                     {% endif %}
+
+                    <form class="edit_content_{% if section and section.has_body %}resource{% elif section%}section{% else %}casebook{% endif %}" method="{{ form.helper.form_method }}" enctype="multipart/form-data">
+                        {% crispy form %}
+                        {% if embedded_resource_form %}{% crispy embedded_resource_form %}{% endif %}
+                    </form>
                 {% else %}
                     {% if section %}
                         {% if section.subtitle %}
@@ -74,10 +78,17 @@
                             {{ section.subtitle }}
                         </h2>
                         {% endif %}
-                    {% elif casebook.subtitle %}
-                    <h2 class="subtitle">
-                        {{ casebook.subtitle }}
-                    </h2>
+                    {% else %}
+                        {% if casebook.subtitle %}
+                        <h2 class="subtitle">
+                            {{ casebook.subtitle }}
+                        </h2>
+                        {% endif %}
+                        {% if casebook.description %}
+                        <h4 class="description">
+                            {{ casebook.description }}
+                        </h4>
+                        {% endif %}
                     {% endif %}
                     <div class="authorship">
                         <div class="collaborators">
@@ -105,6 +116,15 @@
                 {% else %}
             {% endif %}
         </div>
+
+        <div class="casebook-inner">
+            {% include "includes/casebook_copyright_notice.html" %}
+        </div>
+
     </div>
+
+
 </section>
+
+
 {% endblock %}

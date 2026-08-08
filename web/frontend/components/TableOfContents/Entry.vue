@@ -4,11 +4,12 @@
   v-bind:class="['listing-wrapper', showDelete ? 'delete-confirm' : '', animated, dimmed]"
   v-click-outside.stop.prevent="dismissAudit"
   >
-  <component :is="editing ? 'vue-nestable-handle' : 'div'" v-bind:item="item">
+  <div v-bind:item="item">
     <div v-bind:class="{'listing':true, 'resource':true, 'temporary': item.resource_type == 'Temp', 'editing': 'editing'}" v-if="isResource">
+      <vue-nestable-handle v-if="editing" class="drag-target" :item="item"><i class="fa fa-th" aria-hidden="true"></i></vue-nestable-handle>
       <div class="list-left">
-        <div class="section-number">{{ item.ordinal_string }}</div>
-        
+        <div :class="{'section-number': true, 'is-instructional-material': item.is_instructional_material}">{{ item.ordinal_string }}</div>
+
         <div class="resource-container" v-if="isLegalDoc">
           <a :href="url" class="section-title case-section-title">{{ item.title }}</a>
           <div class="case-metadata-container">
@@ -16,12 +17,16 @@
             <div class="resource-date">{{ item.decision_date }}</div>
           </div>
         </div>
-        
+        <div v-else-if="item.resource_type === 'Temp'">
+          <button class="specify-case-title"
+            @click="auditThisCase"
+          >{{ item.title }}</button>
+        </div>
         <div class="resource-container" v-else>
           <a :href="url" class="section-title">{{ item.title }}</a>
         </div>
       </div>
-      
+
       <div class="list-right">
         <div v-if="needsToSpecifyCase">
           <button
@@ -58,8 +63,9 @@
 
       </div>
     </div>
-    
+
     <div class="listing section" v-bind:class="['listing', 'section' ,item.children.length > 0 ? 'child-present' : 'child-free', editing ? 'editing' : '' ]" v-else>
+      <vue-nestable-handle v-if="editing" class="drag-target" :item="item"><i class="fa fa-th" aria-hidden="true"></i></vue-nestable-handle>
       <div class="list-left">
         <button
           aria-role="heading"
@@ -73,11 +79,9 @@
         </button>
         <div class="section-number">{{ item.ordinal_string }}</div>
         <div class="section-container">
-          <!--      -->
           <div class="section-title">
             <a :href="url" class="section-title">{{ item.title }}</a>
           </div>
-          
         </div>
       </div>
       <div class="list-right">
@@ -108,7 +112,7 @@
 
       </div>
     </div>
-  </component>
+  </div>
   <div class="audit-drawer" v-if="item.audit && item.resource_type === 'Temp'">
     <entry-auditor :item="item"></entry-auditor>
     </div>
@@ -291,5 +295,27 @@ export default {
 }
 .specify-case-button {
     margin-right: 1rem;
+}
+.specify-case-title {
+  border: none;
+  background: none;
+}
+
+.drag-target {
+  position: absolute;
+  height: 100%;
+  width: 2em;
+  right: -2.25em;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  text-align: center;
+  color: #777;
+  background: lightgray;
+
+  &:hover {
+    cursor: grab;
+  }
 }
 </style>

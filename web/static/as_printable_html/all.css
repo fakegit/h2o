@@ -1,0 +1,215 @@
+@import "cap.css";
+@import "uscode.css";
+@import "toc.css";
+
+@media all {
+  :root {
+    --color-background: whitesmoke;
+    --color-light-blue: #3e72d8;
+    --color-white: white;
+    --color-light-gray: lightgray;
+    --color-dark-gray: gray;
+    --color-medium-gray: darkgray;
+    --color-black: rgb(2, 2, 2);
+    --color-canvas: #f5f4ec; /* The background color from the main site */
+    --font-sans-serif: "Atlas Grotesk";
+    --highlight-background-greyscale: #ededed;
+    --highlight-background-color: #fff7b9;
+  }
+  html, body {
+    margin: 0;
+  }
+  /* Always start a top-level section on a new page, even if there's preface matter */
+  section.section.depth-1 {
+    break-before: right;
+  }
+  div,
+  span,
+  p {
+    color: unset !important;
+    letter-spacing: unset !important;
+    font-family: var(--casebook-font-family), serif !important;
+  }
+
+  p,
+  div {
+    font-size: var(--casebook-font-size) !important;
+    line-height: var(--casebook-line-height) !important;
+    font-family: var(--casebook-font-family), serif !important;
+    margin: 0;
+  }
+
+
+  pre {
+    white-space: pre-wrap;
+  }
+
+  h1.casebook.title {
+    font-size: 300%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: calc(var(--casebook-font-size) * 1.5) 0
+      calc(var(--casebook-font-size) * 1.8) 0;
+    font-family: var(--casebook-font-family), serif;
+    line-height: 140%;
+    font-weight: normal;
+  }
+
+  h1 {
+    font-size: 200%;
+    line-height: 110%;
+  }
+
+  h2 {
+    font-size: 130%;
+  }
+
+  h3 {
+    font-size: 125%;
+  }
+
+  h3 {
+    font-size: 125%;
+  }
+
+  .depth-2 h1 {
+    font-size: 150%;
+  }
+
+  .depth-2 h2 {
+    font-size: 125%;
+  }
+
+  .depth-2 h3 {
+    font-size: 110%;
+  }
+
+  :is(.depth-3, .depth-4, .depth-5) h1 {
+    font-size: 100%;
+    font-weight: bold;
+    line-height: 140%;
+
+  }
+
+  :is(.depth-3, .depth-4, .depth-5) h2 {
+    font-size: 100%;
+    font-weight: bold;
+  }
+
+  :is(.depth-3, .depth-4, .depth-5) h3 {
+    font-size: 100%;
+    font-weight: bold;
+  }
+
+  /* Headers for links are much smaller */
+  h1.link {
+    font-size: 100%;
+    font-weight: bold;
+  }
+  h2.subtitle {
+    font-size: 100%;
+    font-style: italic;
+  }
+
+  section.headnote {
+    margin: 0 calc(-1 * (var(--headnote-padding)));
+    padding: 0 var(--headnote-padding);
+  }
+
+  section.link {
+    margin-top: 10mm;
+  }
+  section.depth-2.legaldocument {
+    break-before: page;
+  }
+  sup {
+    font-size: calc(var(--casebook-font-size) / 2.5);
+  }
+  ol,
+  ul {
+    margin: initial;
+  }
+  li {
+    list-style-type: initial;
+  }
+
+  div.author-list {
+    margin: 0;
+  }
+
+  .title > span:nth-of-type(2) {
+    display: block;
+  }
+  .link-container {
+    min-height: var(--link-icon-height);
+    display: flex;
+    align-items: center;
+    gap: var(--casebook-font-size);
+  }
+
+  .link-icon {
+    min-width: var(--link-icon-width);
+    min-height: var(--link-icon-height);
+    background: url("../images/Link.svg") no-repeat;
+    background-size: contain;
+    display: inline-block;
+  }
+  .hidden {
+    display: none;
+  }
+
+  .casebook-metadata li,
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .highlighted,
+  mark {
+    background: var(--highlight-background-color);
+    padding: calc(var(--casebook-line-height) * 0.2) 0;
+  }
+
+  p:has(> ins:last-child):has(> del:first-child) {
+    text-indent: 0;
+  }
+
+  del:is(.replace, .correction, .elided) {
+    display: none;
+  }
+  ins:is(.replace, .correction, .elision-marker) {
+    text-decoration: none;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  /* Usually hidden node title that will be displayed in screen view */
+  .node-heading {
+    display: none;
+  }
+
+  /* Collapse line breaks from cases that are adjacent to deletions/insertions */
+  ins + br {
+    display: none;
+  }
+
+  @font-face {
+    font-family: "Atlas Grotesk";
+    src: url("../fonts/AtlasGrotesk-Regular.woff2") format("woff2");
+    font-weight: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Atlas Grotesk";
+    src: url("../fonts/AtlasGrotesk-Bold.woff2") format("woff2");
+    font-weight: bold;
+    font-display: swap;
+  }
+}

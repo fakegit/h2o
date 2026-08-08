@@ -1,0 +1,13 @@
+<p class="casebook-copyright-notice">
+    This book, and all H2O books, are <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/ ">Creative Commons licensed</a>
+    for sharing and re-use with the exception of certain excerpts.
+
+
+    <span class="ali-license">
+    {% if section.ali_licensed %}
+            {{ section.get_ali_license_text }}
+    {% else %}
+        Any excerpts from the <i>Restatements of the Law</i>, <i>Principles of the Law</i>, and the <i>Model Penal Code</i> are copyright by The American Law Institute. Excerpts are reproduced with permission, not as part of a Creative Commons license.
+    {% endif %}
+    </span>
+</p>
